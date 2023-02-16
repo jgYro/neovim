@@ -52,7 +52,6 @@ Plug('gelguy/wilder.nvim')
 --
 --
 Plug('neovim/nvim-lspconfig')
-require'lspconfig'.pyright.setup{}
 --
 --
 ----=====
@@ -151,6 +150,7 @@ vim.call('plug#end')
 --
 --
 require'hop'.setup()
+require'lspconfig'.pyright.setup{}
 --
 --
 ----=====
