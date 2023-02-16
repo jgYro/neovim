@@ -1,5 +1,19 @@
+vim.keymap.set("n", "<C-h>", "<C-w>h")
 local Plug = vim.fn['plug#']
 vim.call('plug#begin', '~/.config/nvim/plugged')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('ThePrimeagen/harpoon')
 --
 --
 ----=====
@@ -258,10 +272,23 @@ vim.g.mapleader = " "
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.g.python3_host_prog = "/usr/bin/python3"
+
 -- Hop
 vim.keymap.set("n", "<leader><leader>", "<cmd>HopAnywhere<cr>")
 
 -- Telescope
+require("telescope").load_extension('harpoon')
+local mark = require("harpoon.mark")
+local ui = require("harpoon.ui")
+
+vim.keymap.set("n", "<leader>a", mark.add_file)
+vim.keymap.set("n", "<leader>e", ui.toggle_quick_menu)
+
+vim.keymap.set("n", "<leader>h", function() ui.nav_file(1) end)
+vim.keymap.set("n", "<leader>j", function() ui.nav_file(2) end)
+vim.keymap.set("n", "<leader>k", function() ui.nav_file(3) end)
+vim.keymap.set("n", "<leader>l", function() ui.nav_file(4) end)
 vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<cr>")
 vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<cr>")
 vim.keymap.set("n", "<leader>fd", "<cmd>Telescope diagnostics<cr>")
@@ -379,7 +406,6 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Better vim colors
-vim.opt.termguicolors = true
 
 vim.opt.scrolloff = 8
 vim.opt.isfname:append("@-@")
