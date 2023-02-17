@@ -1,6 +1,18 @@
-vim.keymap.set("n", "<C-h>", "<C-w>h")
 local Plug = vim.fn['plug#']
 vim.call('plug#begin', '~/.config/nvim/plugged')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('christoomey/vim-tmux-navigator')
 --
 --
 ----=====
@@ -357,6 +369,9 @@ vim.keymap.set('n', '<leader>rp', '<cmd>FlowRunFile<cr>')
 
 --Run Python selection (only tested on python)
 vim.keymap.set('x', '<leader>rs', ':FlowRunSelected<cr>')
+
+-- Copy to system clipboard
+vim.keymap.set('x', '<leader>y', '"*y')
 --
 --
 ----=====
