@@ -12,6 +12,110 @@ vim.call('plug#begin', '~/.config/nvim/plugged')
 ----=====
 --
 --
+Plug('nvim-telescope/telescope-ui-select.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('simrat39/rust-tools.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('debugloop/telescope-undo.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('phaazon/mind.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('RRethy/vim-illuminate')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('numToStr/Comment.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('kylechui/nvim-surround')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+Plug('numToStr/Navigator.nvim')
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
 Plug('christoomey/vim-tmux-navigator')
 --
 --
@@ -38,7 +142,7 @@ Plug('ThePrimeagen/harpoon')
 ----=====
 --
 --
-Plug('EdenEast/nightfox.nvim')
+Plug('ray-x/aurora')
 --
 --
 ----=====
@@ -64,7 +168,7 @@ Plug('arjunmahishi/flow.nvim')
 ----=====
 --
 --
-Plug('gelguy/wilder.nvim')
+-- Plug('gelguy/wilder.nvim')
 --
 --
 ----=====
@@ -107,6 +211,9 @@ vim.g.coq_settings = { auto_start = "shut-up" }
 --
 --
 Plug('nvim-treesitter/nvim-treesitter')
+Plug('HiPhish/nvim-ts-rainbow2')
+Plug('nvim-treesitter/nvim-treesitter-textobjects')
+
 --
 --
 ----=====
@@ -175,45 +282,97 @@ vim.call('plug#end')
 ----=====
 --
 --
-require'hop'.setup()
-require'lspconfig'.pyright.setup{}
---
---
-----=====
-----/\===
----/  \==
---/    \=
---\    /=
----\  /==
-----\/===
-----=====
---
---
-local wilder = require('wilder')
-wilder.setup({modes = {':', '/', '?'}, next_key = "<C-n>", previous_key = "<C-p>"})
-wilder.set_option('pipeline', {
-  wilder.branch(
-    wilder.cmdline_pipeline({
-      -- sets the language to use, 'vim' and 'python' are supported
-      language = 'vim',
-      -- 0 turns off fuzzy matching
-      -- 1 turns on fuzzy matching
-      -- 2 partial fuzzy matching (match does not have to begin with the same first letter)
-      fuzzy = 1,
-    })
-  ),
+local rt = require("rust-tools")
+rt.setup({
+  server = {
+    on_attach = function(_, bufnr)
+      -- Hover actions
+      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+      -- Code action groups
+      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+    end,
+  },
 })
-wilder.set_option('renderer', wilder.popupmenu_renderer(
-  wilder.popupmenu_palette_theme({
-    -- 'single', 'double', 'rounded' or 'solid'
-    -- can also be a list of 8 characters, see :h wilder#popupmenu_palette_theme() for more details
-    border = 'rounded',
-    max_height = '75%',      -- max height of the palette
-    min_height = 0,          -- set to the same as 'max_height' for a fixed height window
-    prompt_position = 'top', -- 'top' or 'bottom' to set the location of the prompt
-    reverse = 0,             -- set to 1 to reverse the order of the list, use in combination with 'prompt_position'
-  })
-))
+require'hop'.setup()
+require'mind'.setup()
+require('Comment').setup()
+require("nvim-surround").setup()
+require'lspconfig'.pyright.setup{}
+require'lspconfig'.rust_analyzer.setup{}
+require('Navigator').setup()
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = { "python", "lua", "vim", "help", "rust", "bash" },
+  sync_install = false,
+  auto_install = true,
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+  rainbow = {
+    enable = true,
+    -- Which query to use for finding delimiters
+    query = 'rainbow-parens',
+    -- Highlight the entire buffer all at once
+    strategy = require 'ts-rainbow.strategy.global',
+    max_file_lines = 3000
+  },
+  textobjects = {
+    lsp_interop = {
+      enable = true,
+      border = 'none',
+      floating_preview_opts = {},
+      peek_definition_code = {
+        ["<leader>df"] = "@function.outer",
+        ["<leader>dF"] = "@class.outer",
+      },
+    },
+    textobjects = {
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        ["]m"] = "@function.outer",
+        ["]]"] = { query = "@class.outer", desc = "Next class start" },
+        --
+        -- You can use regex matching and/or pass a list in a "query" key to
+        -- group multiple queires.
+        ["]o"] = "@loop.*",
+        -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
+        --
+        -- You can pass a query group to use query from
+        -- `queries/<lang>/<query_group>.scm file in your runtime path.
+        -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They
+        -- also provide highlights.scm and indent.scm.
+        ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope"
+    },
+        ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
+      },
+      goto_next_end = {
+        ["]M"] = "@function.outer",
+        ["]["] = "@class.outer",
+      },
+      goto_previous_start = {
+        ["[m"] = "@function.outer",
+        ["[["] = "@class.outer",
+      },
+      goto_previous_end = {
+        ["[M"] = "@function.outer",
+        ["[]"] = "@class.outer",
+      },
+      -- Below will go to either the start or the end, whichever is closer.
+      -- Use if you want more granular movements
+      -- Make it even more gradual by adding multiple queries and regex.
+      goto_next = {
+        ["]d"] = "@conditional.outer",
+      },
+      goto_previous = {
+        ["[d"] = "@conditional.outer",
+      }
+    },
+   },
+  },
+}
+
 --
 --
 ----=====
@@ -226,7 +385,52 @@ wilder.set_option('renderer', wilder.popupmenu_renderer(
 ----=====
 --
 --
-vim.cmd("colorscheme carbonfox")
+-- local wilder = require('wilder')
+-- wilder.setup({modes = {':', '/', '?'}, next_key = "<C-n>", previous_key =
+-- "<C-p>"})
+-- wilder.set_option('pipeline', {
+--   wilder.branch(
+--     wilder.cmdline_pipeline({
+--       -- sets the language to use, 'vim' and 'python' are supported
+--       language = 'vim',
+--       -- 0 turns off fuzzy matching
+--       -- 1 turns on fuzzy matching
+--       -- 2 partial fuzzy matching (match does not have to begin with the same
+--       first letter)
+--       fuzzy = 1,
+--     })
+--   ),
+-- })
+-- wilder.set_option('renderer', wilder.popupmenu_renderer(
+--   wilder.popupmenu_palette_theme({
+--     -- 'single', 'double', 'rounded' or 'solid'
+--     -- can also be a list of 8 characters, see :h
+--     wilder#popupmenu_palette_theme() for more details
+--     border = 'rounded',
+--     max_height = '75%',      -- max height of the palette
+--     min_height = 0,          -- set to the same as 'max_height' for a fixed
+--     height window
+--     prompt_position = 'top', -- 'top' or 'bottom' to set the location of the
+--     prompt
+--     reverse = 0,             -- set to 1 to reverse the order of the list,
+--     use in combination with 'prompt_position'
+--   })
+-- ))
+--
+--
+----=====
+----/\===
+---/  \==
+--/    \=
+--\    /=
+---\  /==
+----\/===
+----=====
+--
+--
+vim.cmd("colorscheme aurora")
+vim.g.aurora_transparent = 1
+vim.g.aurora_darker = 1
 --
 --
 ----=====
@@ -291,6 +495,9 @@ vim.keymap.set("n", "<leader><leader>", "<cmd>HopAnywhere<cr>")
 
 -- Telescope
 require("telescope").load_extension('harpoon')
+require("telescope").load_extension('undo')
+require("telescope").load_extension("ui-select")
+
 local mark = require("harpoon.mark")
 local ui = require("harpoon.ui")
 
@@ -303,13 +510,15 @@ vim.keymap.set("n", "<leader>k", function() ui.nav_file(3) end)
 vim.keymap.set("n", "<leader>l", function() ui.nav_file(4) end)
 vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<cr>")
 vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<cr>")
+vim.keymap.set("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>")
 vim.keymap.set("n", "<leader>fd", "<cmd>Telescope diagnostics<cr>")
 vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>")
 vim.keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>")
 vim.keymap.set("n", "<leader>ft", "<cmd>Telescope <cr>")
 vim.keymap.set("n", "<leader>p", "<cmd>Telescope registers<cr>")
+vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<cr>")
 vim.keymap.set("i", "<alt>p", "<cmd>Telescope registers<cr>")
-vim.keymap.set("n", "/", "<cmd>Telescope current_buffer_fuzzy_find<cr>")
+vim.keymap.set("n", "<leader>/", "<cmd>Telescope current_buffer_fuzzy_find<cr>")
 
 -- Emacs movement in insert mode
 vim.keymap.set("i", "<A-p>", "<C-o><cmd>Telescope registers<cr>")
@@ -340,10 +549,10 @@ vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 
 -- Move to other vim windows
-vim.keymap.set("n", "<C-h>", "<C-w>h")
-vim.keymap.set("n", "<C-j>", "<C-w>j")
-vim.keymap.set("n", "<C-k>", "<C-w>k")
-vim.keymap.set("n", "<C-l>", "<C-w>l")
+vim.keymap.set("n", "<C-h>", "<cmd>NavigatorLeft<cr>")
+vim.keymap.set("n", "<C-j>", "<cmd>NavigatorDown<cr>")
+vim.keymap.set("n", "<C-k>", "<cmd>NavigatorUp<cr>")
+vim.keymap.set("n", "<C-l>", "<cmd>NavigatorRight<cr>")
 
 -- Not override value to be pasted after deletction or pasting of previous value
 vim.keymap.set("x", "<leader>p", [["_dP]])
@@ -357,7 +566,8 @@ vim.keymap.set("n", "<leader>Y", [["+Y]])
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 
 -- Native find and replace with cursor
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>s",
+[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- Open terminals
 vim.keymap.set('n', '<leader>t', '<cmd>:split<CR><cmd>:term<CR>a')
